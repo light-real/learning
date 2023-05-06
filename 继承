@@ -18,8 +18,10 @@ public:
 	} 
 	vector<int> vec;
 	stack<int> sta;
+	
+	static int age; //类内声明，类外初始化 
 }; 
-
+int Base::age  = 21; 
 class Son : public Base{
 public:
 	vector<int> vec;
@@ -32,7 +34,17 @@ public:
 	void func(){
 		cout<<"son func 调用"<<endl;
 	}
+	
+	static void func_1(){ //静态成员函数，只能访问静态成员变量 
+		cout<<"Son-static func_1 is visiting age,and age is "<< age <<endl; 
+//		cout<<name<<endl;  //不可访问 
+	}
+//private:
+	static int age;  //静态成员变量的处理方式：类内声明，类外初始化	
+	int name;
 };
+
+int Son::age  = 22; 
 
 ostream& operator<<(ostream &cout,Son &s){   // <<运算符只能在类外实现 
 //	while(!b.sta.empty()){
@@ -64,6 +76,10 @@ void test01(){
 	s.func();
 	cout<<"------------------"<<endl;
 	s.Base::func();
+	cout<<"------------------"<<endl;
+	cout<<s.age<<endl;	
+	cout<<"------------------"<<endl;
+	s.func_1();
 } 
 
 int main(){
