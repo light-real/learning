@@ -2,52 +2,6 @@
 #include<string>
 using namespace std;
 
-class WorkerManager{
-
-	public:
-		WorkerManager();
-		
-		void ShowMenu();  //显示菜单 
-		
-		void exitSystem(); //退出程序
-		
-		void AddWorker(); //添加职工信息 
-		 
-		~WorkerManager(); 
-	protected:
-};
-
-
-WorkerManager::WorkerManager(){
-	
-} 
-
-void WorkerManager::ShowMenu(){
-	cout<<"-----------------------------------\n";
-	cout<<"-------欢迎使用职工管理系统--------\n";
-	cout<<"-------   0.退出管理程序   --------\n";
-	cout<<"-------   1.增加职工信息   --------\n"; 
-	cout<<"-------   2.显示职工信息   --------\n";
-	cout<<"-------   3.删除离职员工   --------\n";
-	cout<<"-------   4.修改职工信息   --------\n";
-	cout<<"-------   5.查找职工信息   --------\n";
-	cout<<"-------   6.按照编号排序   --------\n";
-	cout<<"-------   7.清空所有文档   --------\n";
-	cout<<"-----------------------------------\n";
-	cout<<endl;
-}
-
-void WorkerManager::exitSystem(){
-	cout<<"欢迎下次使用"<<endl;
-	system("pause");
-	exit(0);
-}
-
-WorkerManager::~WorkerManager(){
-	
-} 
-
-
 //创建职工抽象类：
 //职工的分类：普通员工、经理、老板
 //将三种职工抽象到一个类(Worker)中，利用多态管理不同职工种类
@@ -139,59 +93,179 @@ void Boss::showInfo(){
 	cout<<"职工编号："<<this->m_Id
 		<<"\t职工姓名："<<this->m_name
 		<<"\t岗位："<<this->getDepName()
-		<<"\t岗位职责：把任务交代给经理"<<endl; 
+		<<"\t岗位职责：管理公司所有的事务"<<endl; 
 }
 
 string Boss::getDepName(){
 	return string("老板");
 }
+ 
+
+class WorkerManager{
+
+	public:
+		WorkerManager();
+		
+		void ShowMenu();  //显示菜单 
+		
+		void exitSystem(); //退出程序
+		
+		void AddWorker(); //添加职工信息 
+		
+		int m_Empnum;  //记录职工人数
+		
+		Worker ** m_EmpArray; //用于记录Work*的指针 
+		
+		void addEmp(); //用于添加职工 
+		 
+		~WorkerManager(); 
+		
+		
+	protected:
+};
+
+
+WorkerManager::WorkerManager(){
+	this->m_Empnum = 0;
+	this->m_EmpArray = NULL; 
+} 
+
+
+void WorkerManager::ShowMenu(){
+	cout<<"-----------------------------------\n";
+	cout<<"-------欢迎使用职工管理系统--------\n";
+	cout<<"-------   0.退出管理程序   --------\n";
+	cout<<"-------   1.增加职工信息   --------\n"; 
+	cout<<"-------   2.显示职工信息   --------\n";
+	cout<<"-------   3.删除离职员工   --------\n";
+	cout<<"-------   4.修改职工信息   --------\n";
+	cout<<"-------   5.查找职工信息   --------\n";
+	cout<<"-------   6.按照编号排序   --------\n";
+	cout<<"-------   7.清空所有文档   --------\n";
+	cout<<"-----------------------------------\n";
+	cout<<endl;
+}
+
+void WorkerManager::addEmp(){
+	cout<<"请输入添加职工的数量"<<endl;
+	int addNum;  //保存用户输入的职工数量
+	cin>>addNum;
+	if(addNum >0 ){
+		//添加 
+		//计算添加新的空间大小
+		int newSize = this->m_Empnum + addNum;   //数组空间大小 + 添加人的数量  = 新空间的大小
+		
+//		开辟新空间
+		Worker **newSpace = new Worker *[newSize]; 
+		//将原来的数据，放到新开辟的空间
+		if(this->m_EmpArray != NULL){
+			for(int i = 0;i<this->m_Empnum;i++){
+				newSpace[i] = this->m_EmpArray[i];  //将原来的数据拷贝到新空间 
+			}
+		} 
+		
+		//添加新数据
+		for(int i = 0;i<addNum;i++){
+			int id; // 职工编号
+			string name;  //职工姓名
+			int did; //部分编号
+			
+			cout<<"请输入第"<<i+1<<"个职工的编号："<<endl;
+			cin>>id;
+			
+			cout<<"请输入第"<<i+1<<"个职工的姓名："<<endl;
+			cin>>name;
+			
+			cout<<"请选择该职工的岗位:\n";
+			cout<<"1、普通职工\n";
+			cout<<"2、经理\n";
+			cout<<"3、老板\n"; 
+			cin>>did;
+			
+			Worker *worker = NULL;
+			switch(did){
+				case 1:
+					worker = new employee(id,name,1);
+					break;
+				case 2:
+					worker = new Manager(id,name,2);
+					break;
+				case 3:
+					worker = new Boss(id,name,3);
+					break;
+				default:
+					break;
+					
+			}
+			
+//			将创建的职工指针，保存在数组当中
+			newSpace[this->m_Empnum + i] = worker; 
+			
+		} 
+		//释放原来的空间
+		delete[] this->m_EmpArray;
+		
+		//更改新空间的指向
+		this->m_EmpArray = newSpace;
+		
+		//更新当前的职工人数
+		this->m_Empnum = newSize;
+		
+		cout<<"成功添加" <<addNum<<"名员工"<<endl; 
+	} 
+	else{
+		cout<<"输入有误"<<endl; 
+	}
+	
+	//按任意键后清屏返回上级
+	system("pause");
+	system("cls"); 
+}
+
+void WorkerManager::exitSystem(){
+	cout<<"欢迎下次使用"<<endl;
+	system("pause");
+	exit(0);
+}
+
+WorkerManager::~WorkerManager(){
+	
+} 
+
+
 
 
 int main(){
-	//实例化一个管理者的对象
-	Worker *Wm = NULL;
-	Wm = new employee(1,"张三",1);
-	Wm->showInfo();
-	delete Wm; 
-	
-	Wm = new Manager(2,"李四",2);
-	Wm->showInfo();
-	delete Wm; 
-	
-	Wm = new Boss(3,"王五",3);
-	Wm->showInfo();
-	delete Wm; 
-
-//	int choice  = 0;
-//	while(true){
-//		Wm.ShowMenu(); //显示菜单
-//		cout<<"请输入你的选择"<<endl; 
-//		cin>>choice;
-//		switch(choice){
-//			case 0: //退出系统 
-//				Wm.exitSystem();
-//				break;
-//			case 1: //增加职工信息
-//				break; 
-//			case 2: //显示职工信息
-//				break;
-//			case 3: //删除职工信息
-//				break;
-//			case 4: //修改职工信息
-//				break;
-//			case 5: //查找职工信息
-//				break;
-//			case 6: //排序职工信息
-//				break;
-//			case 7: //清空职工信息
-//				break;	
-//			default:
-//				system("cls");
-//				break;								
-//		}
-//	}
-	
-	
+	WorkerManager wm;
+	int choice  = 0;
+	while(true){
+		wm.ShowMenu(); //显示菜单
+		cout<<"请输入你的选择"<<endl; 
+		cin>>choice;
+		switch(choice){
+			case 0: //退出系统 
+				wm.exitSystem();
+				break;
+			case 1: //增加职工信息
+				wm.addEmp();
+				break; 
+			case 2: //显示职工信息
+				break;
+			case 3: //删除职工信息
+				break;
+			case 4: //修改职工信息
+				break;
+			case 5: //查找职工信息
+				break;
+			case 6: //排序职工信息
+				break;
+			case 7: //清空职工信息
+				break;	
+			default:
+				system("cls");
+				break;								
+		}
+	}
 	
 	system("pause");	
 	return 0;
