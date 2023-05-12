@@ -1,0 +1,198 @@
+#include<iostream>
+#include<string>
+using namespace std;
+
+class WorkerManager{
+
+	public:
+		WorkerManager();
+		
+		void ShowMenu();  //显示菜单 
+		
+		void exitSystem(); //退出程序
+		
+		void AddWorker(); //添加职工信息 
+		 
+		~WorkerManager(); 
+	protected:
+};
+
+
+WorkerManager::WorkerManager(){
+	
+} 
+
+void WorkerManager::ShowMenu(){
+	cout<<"-----------------------------------\n";
+	cout<<"-------欢迎使用职工管理系统--------\n";
+	cout<<"-------   0.退出管理程序   --------\n";
+	cout<<"-------   1.增加职工信息   --------\n"; 
+	cout<<"-------   2.显示职工信息   --------\n";
+	cout<<"-------   3.删除离职员工   --------\n";
+	cout<<"-------   4.修改职工信息   --------\n";
+	cout<<"-------   5.查找职工信息   --------\n";
+	cout<<"-------   6.按照编号排序   --------\n";
+	cout<<"-------   7.清空所有文档   --------\n";
+	cout<<"-----------------------------------\n";
+	cout<<endl;
+}
+
+void WorkerManager::exitSystem(){
+	cout<<"欢迎下次使用"<<endl;
+	system("pause");
+	exit(0);
+}
+
+WorkerManager::~WorkerManager(){
+	
+} 
+
+
+//创建职工抽象类：
+//职工的分类：普通员工、经理、老板
+//将三种职工抽象到一个类(Worker)中，利用多态管理不同职工种类
+//职工的属性为：职工编号、职工姓名、职工所在部门编号
+//职工的行为：岗位职责信息描述、获取岗位名称
+ 
+//职工抽象类 
+class Worker{
+	public:
+//		显示个人信息
+		virtual void showInfo() = 0;  //纯虚函数
+		
+//		获取岗位名称
+		virtual string getDepName() = 0; 
+		
+		int m_Id;  // 职工编号
+		string m_name; //职工姓名
+		int m_depId; //职工部门编号 
+};
+
+//员工类
+class employee:public Worker{
+public:
+	employee(int id,string name,int did); //构造函数 
+	virtual void showInfo();//显示个人信息 
+	
+	virtual string getDepName(); //获取岗位名称 
+};
+
+employee::employee(int id,string name,int did){  //构造函数实现 
+	this->m_Id = id;
+	this->m_name = name;
+	this->m_depId = did;
+}
+
+void employee::showInfo(){
+	cout<<"职工编号："<<this->m_Id
+		<<"\t职工姓名："<<this->m_name
+		<<"\t岗位："<<this->getDepName()
+		<<"\t岗位职责：完成经理交代的任务"<<endl; 
+}
+
+string employee::getDepName(){
+	return string("员工");
+} 
+
+//经理类
+class Manager:public Worker{
+public:
+	Manager(int id,string name,int did); //构造函数 
+	virtual void showInfo();//显示个人信息 
+	
+	virtual string getDepName(); //获取岗位名称 
+};
+
+Manager::Manager(int id,string name,int did){  //构造函数实现 
+	this->m_Id = id;
+	this->m_name = name;
+	this->m_depId = did;
+}
+
+void Manager::showInfo(){
+	cout<<"职工编号："<<this->m_Id
+		<<"\t职工姓名："<<this->m_name
+		<<"\t岗位："<<this->getDepName()
+		<<"\t岗位职责：完成老板交代的任务，传递给员工"<<endl; 
+}
+
+string Manager::getDepName(){
+	return string("经理");
+}
+
+//老板类
+class Boss:public Worker{
+public:
+	Boss(int id,string name,int did); //构造函数 
+	virtual void showInfo();//显示个人信息 
+	
+	virtual string getDepName(); //获取岗位名称 
+};
+
+Boss::Boss(int id,string name,int did){  //构造函数实现 
+	this->m_Id = id;
+	this->m_name = name;
+	this->m_depId = did;
+}
+
+void Boss::showInfo(){
+	cout<<"职工编号："<<this->m_Id
+		<<"\t职工姓名："<<this->m_name
+		<<"\t岗位："<<this->getDepName()
+		<<"\t岗位职责：把任务交代给经理"<<endl; 
+}
+
+string Boss::getDepName(){
+	return string("老板");
+}
+
+
+int main(){
+	//实例化一个管理者的对象
+	Worker *Wm = NULL;
+	Wm = new employee(1,"张三",1);
+	Wm->showInfo();
+	delete Wm; 
+	
+	Wm = new Manager(2,"李四",2);
+	Wm->showInfo();
+	delete Wm; 
+	
+	Wm = new Boss(3,"王五",3);
+	Wm->showInfo();
+	delete Wm; 
+
+//	int choice  = 0;
+//	while(true){
+//		Wm.ShowMenu(); //显示菜单
+//		cout<<"请输入你的选择"<<endl; 
+//		cin>>choice;
+//		switch(choice){
+//			case 0: //退出系统 
+//				Wm.exitSystem();
+//				break;
+//			case 1: //增加职工信息
+//				break; 
+//			case 2: //显示职工信息
+//				break;
+//			case 3: //删除职工信息
+//				break;
+//			case 4: //修改职工信息
+//				break;
+//			case 5: //查找职工信息
+//				break;
+//			case 6: //排序职工信息
+//				break;
+//			case 7: //清空职工信息
+//				break;	
+//			default:
+//				system("cls");
+//				break;								
+//		}
+//	}
+	
+	
+	
+	system("pause");	
+	return 0;
+} 
