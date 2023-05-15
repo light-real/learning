@@ -1,6 +1,8 @@
 #include<iostream>
 #include<string>
+#include<fstream>
 using namespace std;
+#define FILENAME "empFile.txt"
 
 //创建职工抽象类：
 //职工的分类：普通员工、经理、老板
@@ -115,8 +117,20 @@ class WorkerManager{
 		int m_Empnum;  //记录职工人数
 		
 		Worker ** m_EmpArray; //用于记录Work*的指针 
+
+        void save();  //用于保存文件
+
+        bool m_FileIsEmpty;  // 判断文件是否为空
 		
 		void addEmp(); //用于添加职工 
+        
+        int get_Empnum(); //统计文件中的人数
+
+        void init_emp(); //用于初始化员工
+
+        void show_emp(); //用于显示职工 
+
+        
 		 
 		~WorkerManager(); 
 		
@@ -126,8 +140,44 @@ class WorkerManager{
 
 
 WorkerManager::WorkerManager(){
-	this->m_Empnum = 0;
-	this->m_EmpArray = NULL; 
+    //文件不存在的情况
+    ifstream ifs;
+    ifs.open(FILENAME,ios::in);  //读文件
+    if(!ifs.is_open()){
+        cout<<"文件不存在!"<<endl;
+        this->m_Empnum = 0;  //初始化人数为0
+        this->m_EmpArray = NULL;  //初始化数组指针
+        this->m_FileIsEmpty = true;  //文件为空设置为true
+        ifs.close();
+        return;
+    }
+
+
+    //文件存在，数据为空 
+    char ch;
+    ifs >> ch;  //将文件尾读走
+    if(ifs.eof()){ //判断文件是否为空，文件尾已经被读走   eof:empty of file
+        // 文件为空
+        cout<<"文件为空!"<<endl;
+        this->m_Empnum = 0;  //初始化人数为0
+        this->m_EmpArray = NULL;  //初始化数组指针
+        this->m_FileIsEmpty = true;  //文件为空设置为true
+        ifs.close();
+        return;
+    }
+
+    //当文件存在，并且记录数据
+    int num = this->get_Empnum();
+    cout<<"职工人数为："<<num<<endl;
+    this->m_Empnum = num;
+
+	this->m_EmpArray = new Worker*[this->m_Empnum]; // 开辟空间
+    this->init_emp(); //将文件中的数据，存在数组中
+    // for(int i = 0;i<this->m_Empnum;i++){
+    //     cout<<"第"<<i<<"个员工的员工编号："<<this->m_EmpArray[i]->m_Id<<" "
+    //         <<"姓名："<<this->m_EmpArray[i]->m_name<<" "
+    //         <<"部门编号："<<this->m_EmpArray[i]->m_depId<<endl;
+    // }
 } 
 
 
@@ -146,7 +196,7 @@ void WorkerManager::ShowMenu(){
 	cout<<endl;
 }
 
-void WorkerManager::addEmp(){
+void WorkerManager::addEmp(){    //添加职工
 	cout<<"请输入添加职工的数量"<<endl;
 	int addNum;  //保存用户输入的职工数量
 	cin>>addNum;
@@ -210,6 +260,10 @@ void WorkerManager::addEmp(){
 		
 		//更新当前的职工人数
 		this->m_Empnum = newSize;
+
+        this->m_FileIsEmpty = false;  //更新文件是否为空
+
+        this->save();  //保存数据到文件中
 		
 		cout<<"成功添加" <<addNum<<"名员工"<<endl; 
 	} 
@@ -222,6 +276,76 @@ void WorkerManager::addEmp(){
 	system("cls"); 
 }
 
+void WorkerManager::save(){  //写文件实现
+    ofstream ofs;
+    ofs.open(FILENAME,ios::out);  //用输出的方式打开文件 ---- 写文件
+    
+    for(int i = 0;i<this->m_Empnum;i++){
+        ofs<<this->m_EmpArray[i]->m_Id<<" "
+           <<this->m_EmpArray[i]->m_name<<" "
+           <<this->m_EmpArray[i]->m_depId<<endl;
+    }
+
+    ofs.close(); //关闭文件  
+}
+
+int WorkerManager::get_Empnum(){ //统计文件中的人数实现
+    ifstream ifs;
+    ifs.open(FILENAME,ios::in);
+    
+    int id;
+    string name;
+    int did;
+
+    int num = 0; // 用于统计人数
+    while(ifs>>id && ifs>>name && ifs>>did){
+        num++;
+    }
+    
+    return num;
+}
+
+void WorkerManager::init_emp(){  //初始化员工
+    ifstream ifs;
+    ifs.open(FILENAME,ios::in);  //读文件
+    if(!ifs.is_open()){
+        cout<<"文件打开失败"<<endl;
+    }
+    int id;
+    string name;
+    int did;
+    int index = 0;
+    while(ifs >> id && ifs >> name && ifs >> did){
+        Worker *worker = NULL; //创建一个父类指针 用于创建从文件中读到的员工
+        if(did == 1 ){  // 部门为 普通员工 时
+            worker = new employee(id,name,did);
+        }
+        else if(did == 2 ){  // 部门为 经理 时
+            worker = new Manager(id,name,did);
+        }
+        else{  // 部门为 老板 时
+            worker = new Boss(id,name,did);
+        }
+        this->m_EmpArray[index] = worker;
+        index++;
+    }
+    ifs.close();
+}
+
+void WorkerManager::show_emp(){
+    //判断文件是否为空或者不存在
+    if(this->m_FileIsEmpty){
+        cout<<"文件不存在或者记录为空"<<endl;
+    }
+    else{
+        for(int i = 0;i< m_Empnum;i++){
+            this->m_EmpArray[i]->showInfo(); //利用多态调用程序接口
+        }
+    }
+    system("pause");
+    system("cls");
+}
+
 void WorkerManager::exitSystem(){
 	cout<<"欢迎下次使用"<<endl;
 	system("pause");
@@ -229,7 +353,10 @@ void WorkerManager::exitSystem(){
 }
 
 WorkerManager::~WorkerManager(){
-	
+	if(this->m_EmpArray != NULL){
+        delete[] this->m_EmpArray;
+        this->m_EmpArray = NULL;
+    }
 } 
 
 
@@ -250,6 +377,7 @@ int main(){
 				wm.addEmp();
 				break; 
 			case 2: //显示职工信息
+                wm.show_emp();
 				break;
 			case 3: //删除职工信息
 				break;
