@@ -153,6 +153,12 @@ public:
 
     //查找职工信息
     void find_Emp(); 
+    
+    //对员工按照编号进行排序
+    void sort_Emp();
+
+    //清空文件
+    void clean_File();
 
     // 判断职工是否存在
     int isExist(int id);
@@ -354,7 +360,7 @@ int WorkerManager::get_Empnum()
 }
 
 void WorkerManager::init_emp()
-{ // 初始化员工
+{ // 初始化员工，将文件中的数据读出来，拿到数组中
     ifstream ifs;
     ifs.open(FILENAME, ios::in); // 读文件
     if (!ifs.is_open())
@@ -365,7 +371,7 @@ void WorkerManager::init_emp()
     string name;
     int did;
     int index = 0;
-    while (ifs >> id && ifs >> name && ifs >> did)
+    while (ifs >> id && ifs >> name && ifs >> did)  //首先ifs把m_id给id，然后后移，将m_name给name...
     {
         Worker *worker = NULL; // 创建一个父类指针 用于创建从文件中读到的员工
         if (did == 1)
@@ -529,6 +535,69 @@ void WorkerManager::find_Emp(){
     system("cls");
 }
 
+void WorkerManager::sort_Emp(){ //按照编号排序实现
+    if(this->m_FileIsEmpty){
+        cout<<"文件不存在或者文件为空!"<<endl;
+    }
+    else{
+        cout<<"请输入你想要的排序方式：\n1、升序排序(从小到大排列)\n2、降序排序(从大到小排列)"<<endl;
+        int sort_style;
+        cin>>sort_style;
+        Worker *worker = NULL;
+        for(int i= 0 ;i<this->m_Empnum;i++){
+            int minOrmax = i;
+            if(sort_style == 1){  //升序排序
+                for(int j = i+1;j<this->m_Empnum;j++){
+                    if(this->m_EmpArray[j]->m_Id < this->m_EmpArray[minOrmax]->m_Id){
+                        minOrmax = j;
+                    }
+                }
+            }
+            else{
+                for(int j = i+1;j<this->m_Empnum;j++){
+                    if(this->m_EmpArray[j]->m_Id > this->m_EmpArray[minOrmax]->m_Id){
+                        minOrmax = j;
+                    }
+                }
+            }
+            if(i != minOrmax){
+                worker = this->m_EmpArray[minOrmax];
+                this->m_EmpArray[minOrmax] = this->m_EmpArray[i];
+                this->m_EmpArray[i] = worker;    
+            }
+        }
+        this->save();
+        cout<<"排序成功！"<<endl;
+    }
+    system("pause");
+    system("cls");
+}
+
+void WorkerManager::clean_File(){ //清空文件
+    cout<<"您是否准备清空文件？\n1、确定清空!\n2、返回!"<<endl;
+    int select;
+    cin>>select;
+    if(select == 1){
+        ofstream ofs;
+        ofs.open(FILENAME,ios::trunc);  //打开模式 ios::trunc 如果存在删除文件并重新创建文件
+        ofs.close();
+        if(this->m_EmpArray != NULL){
+            for(int i = 0;i<this->m_Empnum;i++){
+                if(this->m_EmpArray[i]!=NULL){
+                    delete[] this->m_EmpArray[i];
+                }
+            }
+            this->m_Empnum = 0;
+            delete[] this->m_EmpArray;
+            this->m_EmpArray = NULL;
+            this->m_FileIsEmpty = true;
+        }
+        cout<<"清空成功！"<<endl;
+    }
+    system("pause");
+    system("cls");
+}
+
 int WorkerManager::isExist(int id)
 { // 判断职工是否存在
     int index = -1;
@@ -554,6 +623,9 @@ WorkerManager::~WorkerManager()
 {
     if (this->m_EmpArray != NULL)
     {
+        for(int i = 0;i<this->m_Empnum;i++){
+            delete[] this->m_EmpArray[i];
+        }
         delete[] this->m_EmpArray;
         this->m_EmpArray = NULL;
     }
@@ -589,8 +661,10 @@ int main()
             wm.find_Emp();
             break;
         case 6: // 排序职工信息
+            wm.sort_Emp();
             break;
         case 7: // 清空职工信息
+        	wm.clean_File();
             break;
         default:
             system("cls");
